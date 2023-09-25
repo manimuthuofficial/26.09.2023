@@ -273,3 +273,57 @@ class UserController extends CI_Controller
 
 }
 ?>
+
+To automatically populate the user type dropdown in the user registration form with values from another table in CodeIgniter, you can follow these steps:
+
+// application/models/UserTypeModel.php
+class UserTypeModel extends CI_Model 
+{
+    public function getUserTypes() 
+    {
+        $query = $this->db->get('user_types');
+        return $query->result();
+    }
+}
+
+// application/controllers/UserController.php
+class UserController extends CI_Controller 
+{
+    public function __construct() 
+    {
+        parent::__construct();
+        $this->load->model('UserTypeModel');
+    }
+
+    public function registration_form() 
+    {
+        // Load user types from the model
+        $data['user_types'] = $this->UserTypeModel->getUserTypes();
+
+        // Load the registration form view and pass user types as data
+        $this->load->view('user_registration', $data);
+    }
+
+    // ... other controller functions ...
+}
+
+<!-- application/views/user_registration.php -->
+<form method="post" action="<?php echo base_url('user/register'); ?>">
+    <label for="username">Username:</label>
+    <input type="text" name="username" id="username" />
+
+    <label for="email">Email:</label>
+    <input type="text" name="email" id="email" />
+
+    <label for="password">Password:</label>
+    <input type="password" name="password" id="password" />
+
+    <label for="user_type">User Type:</label>
+    <select name="user_type" id="user_type">
+        <?php foreach ($user_types as $type): ?>
+            <option value="<?php echo $type->id; ?>"><?php echo $type->type_name; ?></option>
+        <?php endforeach; ?>
+    </select>
+
+    <input type="submit" value="Register" />
+</form>
